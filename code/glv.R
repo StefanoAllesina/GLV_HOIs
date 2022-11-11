@@ -1,5 +1,6 @@
 library(deSolve) # to integrate ODEs
 library(tidyverse) # plotting
+source("generate_pars.R")
 THRESH <- 10^-10 # consider extinct if below the threshold
 
 # parameter structure:
@@ -23,85 +24,52 @@ glv_hois <- function(t, x, pars){
   return(list(dx))
 }
 
-generate_random_pars <- function(n){
-  # build a GLV with pairwise interactions that is feasible
-  # with random pairwise interactions
-  x <- abs(rnorm(n))
-  # choose a stable equilibrium
-  success <- FALSE
-  while(!success){
-    A <- matrix(rnorm(n * n), n, n)
-    # make diagonal negative
-    diag(A) <- -abs(diag(A))
-    eA <- eigen(diag(x) %*% A, only.values = TRUE, symmetric = FALSE)$values
-    if (max(Re(eA)) < 0) success <- TRUE
-  }
-  r <- as.vector(-A %*% x)
-  # now build the tensor such that the equilibrium is unchanged
-  # use only "interaction modification" 
-  # for three variables, the only option is no HOIs
-  B <- list()
-  xxt <- x %o% x
-  for (i in 1:n){
-    Bi <- matrix(rnorm(n * n), n, n)
-    diag(Bi) <- 0
-    Bi[i,] <- 0
-    Bi[,i] <- 0
-    # subtract mean
-    Bi[Bi !=0] <- Bi[Bi !=0] - mean(Bi[Bi !=0])
-    # divide each element
-    Bi <- Bi / xxt
-    B[[i]] <- Bi
-  }
-  return(pars = list(
-    n = n,
-    r = r,
-    A = A,
-    B = B,
-    xstar = x
-  ))
-}
-
-test_pars <- function(n){
-  # build random model
-  tmp <- generate_random_pars(n)
-  # growth rates at equilibrium (pairwise model)
-  print(round(unlist(glv(0, tmp$xstar, tmp)), 15))
-  # growth rates at equilibrium (HOIs model)
-  print(round(unlist(glv_hois(0, tmp$xstar, tmp), 15)))
-}
-
-integrate_dynamics <- function(pars, maxtime = 100, steptime = 0.1){
+integrate_dynamics <- function(pars, model = "glv", alpha = 0, maxtime = 100, steptime = 0.1){
   time_integrate <- seq(0, maxtime, by = steptime)
-  # initial conditions are a perturbation of the equilibrium
-  x0 <- abs(pars$xstar * (1 + rnorm(pars$n, 0, 0.001)))
-  out_pairs <- ode(y = x0, times = time_integrate, func = glv, 
+  # initial conditions are a slight perturbation of the equilibrium
+  x0 <- abs(pars$xstar * (1 + rnorm(pars$n, 0, 0.01)))
+  if (model == "glv"){
+    out <- ode(y = x0, times = time_integrate, func = glv, 
                    parms = pars, method = "ode45")
-  out_hois <- ode(y = x0, times = time_integrate, func = glv_hois, 
-                   parms = pars, method = "ode45")
+  } 
+  if (model == "glv_hois"){
+    out <- ode(y = x0, times = time_integrate, func = glv_hois, 
+                     parms = pars, method = "ode45")
+  }
+  if (model == "mix"){
+    pr2 <- pars
+    pr2$A <- alpha * pars$A
+    pr2$B <- (1 - alpha) * pars$B
+    if (model == "glv_hois"){
+      out <- ode(y = x0, times = time_integrate, func = glv_hois, 
+                      parms = pars, method = "ode45")
+    } 
+  }
   return(list(pars = pars,
               x0 = x0,
-              out_pairs = out_pairs,
-              out_hois = out_hois))
+              out = out))
 }
 
-plot_output <- function(out){
-  dt <- out$out_pairs %>% 
+plot_output <- function(out1, out2 = NULL){
+  dt <- out1 %>% 
     as.data.frame() %>% 
     pivot_longer(names_to = "variable", values_to = "abundance", cols = -time) %>% 
-    add_column(model = "pairs")
-  dt <- dt %>% bind_rows(out$out_hois %>% 
+    add_column(model = "first")
+  if (!is.null(out2)){
+    dt <- dt %>% bind_rows(out2 %>% 
                            as.data.frame() %>% 
                            pivot_longer(names_to = "variable", values_to = "abundance", cols = -time) %>% 
-                           add_column(model = "hois"))
-    pl <- ggplot(dt, aes(x = time, y = abundance, colour = variable, linetype = model)) + 
+                           add_column(model = "second"))
+  }
+  pl <- ggplot(dt, aes(x = time, y = abundance, colour = variable, linetype = model)) + 
       geom_line() + facet_wrap(~variable, scales = "free") + theme_bw()
-    return(pl)
+  return(pl)
 }
 
 test_integration <- function(n){
-  pars <- generate_random_pars(n)
-  out <- integrate_dynamics(pars)
-  show(plot_output(out))
-  return(out)
+  pars <- build_GLV_HOIs(n = n, mode = "stable", HOIs = "modification", zerosumBi = TRUE)
+  outpairs <- integrate_dynamics(pars, model = "glv")
+  outhois <- integrate_dynamics(pars, model = "glv_hois")
+  show(plot_output(outpairs$out, outhois$out))
+  return(list(outpairs, outhois))
 }
