@@ -11,17 +11,23 @@ jacobian_index = function(xstar, A, B){
 }
 
 jacobian_vec = function(xstar, A, B){
+  #######################################################
   #Calculate jacobian in a vectorized fashion (efficient)
+  #Parameters:
+    #xstar: Community equilibrium
+    #A: Matrix of species interactions
+    #B: Higher order interaction tensor
+  #######################################################
   #linear part
   L = diag(xstar)%*%A
   #higher order interactions part
-  H = sapply(1:n, function(i)(xstar[i]*(B[[i]]+ t(B[[i]])))%*%xstar)
+  H = sapply(1:n, function(i)(xstar[i]* ((B[[i]] + t(B[[i]])) %*% xstar) ))
   return(L + t(H))
 }
 
 ################################################################################
 #Timing each function
-n_vec = seq(10, 100, 10)
+n_vec = seq(10, 500, 100)
 n_n = length(n_vec)
 #initialize time vectors
 t_ind = rep(0, n_n)
