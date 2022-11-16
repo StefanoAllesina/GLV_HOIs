@@ -82,7 +82,7 @@ perm2comb = function(permutation, combinations){
 }
 
 get_symmetric_B = function(n){
-  #Build a symmetric tensor
+  #Build a random symmetric tensor
   #Get all the posible different indices combinations
   vec_comb = combinations(n, n, repeats.allowed=TRUE)
   n_comb = nrow(vec_comb)
