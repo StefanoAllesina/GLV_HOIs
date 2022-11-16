@@ -1,3 +1,5 @@
+library(gtools)
+
 get_Q = function(sum_vec, n, tol = 1e-10, max_it = 100){
   ##############################################################################
   #Generate a symmetric matrix whose rows (columns) sum to sum_vec
@@ -61,6 +63,45 @@ sample_B = function(row_sums, n){
   return(B)
 }
 
+is_permutation = function(vec1, vec2){
+  #Check if vec1 is a permutation of vec2
+  return(all(sort(vec1) == sort(vec2)))
+}
+
+perm2comb = function(permutation, combinations){
+  #given a list of combinations and a permutation of one of these, identify 
+  #which combination does permutation correspond to
+  n_comb = nrow(combinations)
+  for (i in seq(n_comb)){
+    current_comb = combinations[i,]
+    perm_is_comb = is_permutation(current_comb, permutation)
+    if (perm_is_comb){
+      return(i)
+    }
+  }
+}
+
+get_symmetric_B = function(n){
+  #Build a symmetric tensor
+  #Get all the posible different indices combinations
+  vec_comb = combinations(n, n, repeats.allowed=TRUE)
+  n_comb = nrow(vec_comb)
+  #Assign values to them
+  Bijk = runif(n_comb)
+  for (i in seq(n)){
+    for (j in seq(n)){
+      for (k in seq(n)){
+        #form a vector of indices
+        current_permutation = c(i, j, k)
+        #identify which of the combinations is this a permutation of
+        ind_comb = perm2comb(current_permutation, vec_comb)
+        B[[i]][j,k] = Bijk[ind_comb]
+      }
+    }
+  }
+  return(B)
+  }
+
 test = function(){
   #parameters
   n=4
@@ -68,9 +109,10 @@ test = function(){
   #sample r
   r = runif(n)
   #get column sum vector
-  row_sums = -(1-alpha)*r
+  row_sums = -alpha *r
   B = sample_B(row_sums, n)
-  return(B)
+  B_symm = get_symmetric_B(n)
+  return(list(B, B_sym))
 }
 
 test()
