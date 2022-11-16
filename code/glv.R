@@ -51,12 +51,12 @@ integrate_dynamics <- function(pars, model = "glv", alpha = 0, maxtime = 100, st
 }
 
 plot_output <- function(out1, out2 = NULL){
-  dt <- out1 %>% 
+  dt <- out1$out %>% 
     as.data.frame() %>% 
     pivot_longer(names_to = "variable", values_to = "abundance", cols = -time) %>% 
     add_column(model = "first")
   if (!is.null(out2)){
-    dt <- dt %>% bind_rows(out2 %>% 
+    dt <- dt %>% bind_rows(out2$out %>% 
                            as.data.frame() %>% 
                            pivot_longer(names_to = "variable", values_to = "abundance", cols = -time) %>% 
                            add_column(model = "second"))
