@@ -34,7 +34,7 @@ get_Q = function(sum_vec, n, tol = 1e-10, max_it = 100){
   Q = 1/2*(M+t(M))
   return(Q)
 }
- s
+
 get_B = function(Q, n){
   ##############################################################################
   #Given a matrix Q, compute a tensor B such that the row sums of each of its 
@@ -83,10 +83,12 @@ perm2comb = function(permutation, combinations){
 
 get_symmetric_B = function(n){
   #Build a random symmetric tensor
-  #Get all the posible different indices combinations
-  vec_comb = combinations(n, n, repeats.allowed=TRUE)
+  #initialize 
+  B = array(rep(0, n^3), dim = c(n,n,n))
+  #Get all the possible different indices combinations
+  vec_comb = combinations(n, 3, repeats.allowed=TRUE)
   n_comb = nrow(vec_comb)
-  #Assign values to them
+  #Assign random values to unique elements
   Bijk = runif(n_comb)
   for (i in seq(n)){
     for (j in seq(n)){
@@ -95,7 +97,7 @@ get_symmetric_B = function(n){
         current_permutation = c(i, j, k)
         #identify which of the combinations is this a permutation of
         ind_comb = perm2comb(current_permutation, vec_comb)
-        B[[i]][j,k] = Bijk[ind_comb]
+        B[i,j,k] = Bijk[ind_comb]
       }
     }
   }
@@ -112,7 +114,7 @@ test = function(){
   row_sums = -alpha *r
   B = sample_B(row_sums, n)
   B_symm = get_symmetric_B(n)
-  return(list(B, B_sym))
+  return(list(B, B_symm))
 }
 
 test()
