@@ -33,7 +33,7 @@ build_GLV_HOIs <- function(n, mode = "stable", HOIs = "modification", zerosumBi 
     B <- list()
     xxt <- x %o% x
     for (i in 1:n){
-      Bi <- matrix(rnorm(n * n), n, n)
+      Bi <- matrix(rnorm(n * n, 0, 0.1), n, n)
       if (HOIs == "modification"){
         diag(Bi) <- 0
         Bi[i,] <- 0
@@ -53,7 +53,7 @@ build_GLV_HOIs <- function(n, mode = "stable", HOIs = "modification", zerosumBi 
       B <- list()
       xxt <- x %o% x
       for (i in 1:n){
-        Bi <- matrix(rnorm(n * n), n, n)
+        Bi <- matrix(rnorm(n * n, 0, 0.1), n, n)
         if (HOIs == "modification"){
           diag(Bi) <- 0
           Bi[i,] <- 0

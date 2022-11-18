@@ -1,0 +1,108 @@
+---
+title: "Interesting cases"
+author: "Stefano Allesina"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+setwd("../code/")
+source("glv.R")
+setwd("../notes/")
+```
+
+## Case 1: pairwise are always present
+
+In these simulations, we start with a GLV pairwise model with a feasible equilibrium, and we add HOIs such that the equilibrium is unchanged. What is interesting is to see whether the HOIs can change the stability of the equilibrium. In all case, **we initialize the system very close to equilibrium**.
+
+### Stable pairwise, unstable pairwise + HOIs (modification)
+
+In this particular instance, the pairwise equilibrium is stable, but becomes unstable when adding HOI
+
+```{r}
+set.seed(119)
+p <- build_GLV_HOIs(4, mode = "stable", HOIs = "modification", zerosumBi = TRUE)
+# dynamics pairwise
+outpairs <- integrate_dynamics(p, model = "glv")
+# dynamics pairwise + HOIs
+outhois <- integrate_dynamics(p, model = "glv_hois")
+# plot them together
+show(plot_output(outpairs$out, outhois$out))
+```
+
+### Stable pairwise, stable pairwise + HOIs (modification)
+
+```{r}
+set.seed(5)
+p <- build_GLV_HOIs(4, mode = "stable", HOIs = "modification", zerosumBi = TRUE)
+# dynamics pairwise
+outpairs <- integrate_dynamics(p, model = "glv")
+# dynamics pairwise + HOIs
+outhois <- integrate_dynamics(p, model = "glv_hois")
+# plot them together
+show(plot_output(outpairs$out, outhois$out))
+```
+
+## Unstable pairwise, stable pairwise + HOIs (modification)
+
+```{r}
+set.seed(13)
+p <- build_GLV_HOIs(4, mode = "stable", HOIs = "modification", zerosumBi = TRUE)
+# make barely unstable
+eM <- max(Re(eigen(diag(p$xstar) %*% p$A, only.values = TRUE)$values))
+diag(p$A) <- diag(p$A) -1.1 * eM * 1/p$xstar
+# dynamics pairwise
+outpairs <- integrate_dynamics(p, model = "glv", maxtime = 200)
+# dynamics pairwise + HOIs
+outhois <- integrate_dynamics(p, model = "glv_hois", maxtime = 200)
+# plot them together
+show(plot_output(outpairs$out, outhois$out) + geom_point(data = tibble(time = 0, abundance = p$xstar, variable = as.factor(1:4), model = "second")))
+```
+
+This goes toward another stable equilibrium
+
+```{r}
+set.seed(42)
+p <- build_GLV_HOIs(4, mode = "stable", HOIs = "modification", zerosumBi = TRUE)
+# make barely unstable
+eM <- max(Re(eigen(diag(p$xstar) %*% p$A, only.values = TRUE)$values))
+diag(p$A) <- diag(p$A) -1.1 * eM * 1/p$xstar
+# dynamics pairwise
+outpairs <- integrate_dynamics(p, model = "glv", maxtime = 200)
+# dynamics pairwise + HOIs
+outhois <- integrate_dynamics(p, model = "glv_hois", maxtime = 200)
+# plot them together
+show(plot_output(outpairs$out, outhois$out) + geom_point(data = tibble(time = 0, abundance = p$xstar, variable = as.factor(1:4), model = "first")))
+```
+
+### Neutral pairwise, unstable pairwise + HOIs (general)
+
+```{r}
+set.seed(1005)
+p <- build_GLV_HOIs(4, mode = "neutral", HOIs = "general", zerosumBi = TRUE)
+# dynamics pairwise
+outpairs <- integrate_dynamics(p, model = "glv")
+# dynamics pairwise + HOIs
+outhois <- integrate_dynamics(p, model = "glv_hois")
+# plot them together
+show(plot_output(outpairs$out, outhois$out))
+```
+
+### Neutral pairwise, stable pairwise + HOIs (general)
+
+```{r}
+set.seed(122)
+p <- build_GLV_HOIs(4, mode = "neutral", HOIs = "general", zerosumBi = TRUE)
+# dynamics pairwise
+outpairs <- integrate_dynamics(p, model = "glv", maxtime = 400)
+# dynamics pairwise + HOIs
+outhois <- integrate_dynamics(p, model = "glv_hois", maxtime = 400)
+# plot them together
+show(plot_output(outhois$out,outpairs$out))
+```
+
+
+
+

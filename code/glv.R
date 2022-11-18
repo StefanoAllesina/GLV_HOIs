@@ -62,7 +62,7 @@ plot_output <- function(out1, out2 = NULL){
                            add_column(model = "second"))
   }
   pl <- ggplot(dt, aes(x = time, y = abundance, colour = variable, linetype = model)) + 
-      geom_line() + facet_wrap(~variable, scales = "free") + theme_bw()
+      geom_line() + facet_wrap(~variable, scales = "free") + theme_bw() 
   return(pl)
 }
 
