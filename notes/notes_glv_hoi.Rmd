@@ -1,0 +1,106 @@
+---
+title: "A Conceptual Framework for Mechanistically understanding Higher Order Interactions"
+author: "Allesina lab (Paulinha)"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Framing the problems and intros
+One of the first population dynamical model is the Lotka-Volterra model and after over 100 years of its formulation we know a lot about it. From the many possible extensions of it, less is known about the role of considering higher order interactions in these systems. How many equilibria are there? How to solve them analytically?
+Knowing all possible equilibria of a generalized Lotka-Volterra (GLV) system that includes higher order interactions (HOI) is quite challenging. A convenient approach in this case is to consider an equilibrium point of a purely pairwise LV system to be the same as the equilibrium for the system with the inclusion of HOI. In other words, you start from a given equilibrium of the system without HOI and from there add HOI and investigate how it changes the local equilibrium.
+
+From the GLV formulation for a given species $i$ we have:
+$$
+\dot{x_i} = x_i \left( r_i + \sum_j A_{ij} x_j + \sum_{j,k} B_{ijk} x_j x_k \right)
+$$
+
+Local stability is given by the Jacobian matrix, which evaluated at equilibrium is known as the community matrix $M$ (May, 1972). The diagonal and off-diagonal elements of the community matrix are given by:
+
+$$
+\frac{\partial f_i}{ \partial x_i} \Bigg\rvert_{x^*} = M_{ii} = x^*_i A_{ii}  +  \sum_j (B_{iji} + B_{iij}) x^*_i  x^*_j \\
+$$
+
+$$
+\frac{\partial f_i}{ \partial x_j} \Bigg\rvert_{x^*} = M_{ij} = x^*_i A_{ij}  +  \sum_k (B_{ijk} + B_{ikj}) x^*_j  x^*_k
+$$
+
+As a first approximation we can focus exclusively on HOI that act as interaction modifiers, meaning we are ignoring quadratic terms in which one species modifies the interaction of itself with any other species. When we are considering only interactions modifiers (with all higher order terms in the tensor $B$ equal to zero, i.e., we only considers interactions for $B_{ijk}$ when $i \neq j \neq k$), the second term of the diagonal is zero. The implication of this term being zero leads to our first result: when higher order interactions are given solely by interaction modifiers, the trace of the Jacobian matrix $Tr(M) = \sum \lambda_i = \sum_i M_{ii}$ does not change  with the inclusion of HOI (the second term defining the diagonal element is zero), which means the stability of that fixed point is not changed (and this is regardless of the equilibrium $x^*$). A second result is that if there is no direct interactions in the system and only interaction modifiers (meaning $M_{ii}=0$ because both terms are equal to zero) then the equilibrium is only neutrally stable or unstable (negative trace is a necessary condition for stability).
+
+
+Alternatively we can have another formulation in which there's a parameter $\alpha$ that defines the 'weight' given to pairwise versus higher order interactions:
+
+$$
+\dot{x_i} = x_i \left( r_i + \alpha \sum_j A_{ij} x_j + (1-\alpha) \sum_{j,k} B_{ijk} x_j x_k \right)
+$$
+
+
+Some preliminary analysis show that interaction modifiers can actually change the equilibrium of the system, meaning when added to a system with pairwise interactions, the equilibrium shifts (for more on this check out **interesting_cases.Rmd**).
+
+
+**Boundary equilibra** with this previous approach what we were doing was to consider a feasible equilibrium the same with and without HOI. However this need not the the same for boundary equilibria (and in fact it might not be)
+What about the equilibrium for all the sub-communities? Imagine we now want the equilibrium will all species as well as the equilibrium of all sub-communities to be the same. With this in mind we can then ask what is the $B$ that allows all these equilibria to be the same?
+
+
+### Equilibria are the same with $x^* = 1$
+One way we could simplify things without loss of generality is to consider equilibrium abundances of all species to be equal to one.
+To do so, we can transform the system in $x$ to $y_i = \frac{x_i}{x_i^*}$ with this we have $\dot{y_i} = \frac{1}{x_i^*}\dot{x_i}$ resulting in:
+$$
+\dot{y_i} = y_i \left(r_i + \sum_j A_{ij} x_j  + \sum_{jk}B_{jk} B_{ijk} x_j x_k  \right) \\
+= y_i \left(r_i + \sum_J (A_{ij}x_j^*) y_i + \sum_{jk} (B_{ijk}x_j^* x_k^*) y_j y_k \right)
+$$
+
+### Taylor expansion of a dynamical system and its equivalence to Lotka-Volterra equations
+
+Take a Kolmogorov system of the form $\dot{x_i} = g(x)$ with $g(x^*) = 0$ with $g_i(x) = x_i f(x)$ and Taylor expand it. 
+
+$$
+\dot{x_i} \approx 0 + \nabla g^T_i \Delta x + \Delta x^T \frac{H_i}{2} \Delta x + \frac{1}{6} \sum_{jkl} \frac{\partial^3 g_i}{\partial x_j \partial x_k \partial x_l} \Bigg\rvert_{x^*} (x_j - x_j^*) (x_k - x_k^*) (x_l - x_l^*)
+$$
+
+### General approach with special matrices
+Suppose we have a GLV with pairwise interaction matrix $A = A^T$. For this case, the global stability of the system can be determined using MacArthur's Lyapunov function. We know that for a symmetric and positive-definite $A$ if a feasible equilibrium exists, is unique and globally stable. Let's consider the tensor describing the higher order interactions to be symmetric. This means the tensor is invariant under the permutation of its vector argument:
+$T(v_1, v_2, \ldots, v_r) = T(v_{\sigma1}, v_{\sigma 2}, \ldots, v_{\sigma r})$ for every permutation $\sigma$ of the symbols $\{1, 2, \ldots, r\}$
+
+
+Adapting MacArthur's global stability function to incorporate higher order interactions:
+
+$$
+V = \sum_i r_i x_i + \frac{1}{2} \sum_{ij} A_{ij} x_i x_j + \frac{1}{3} \sum_{ijk} B_{ijk} x_i x_j x_k \\
+
+\dot{V} = \sum_i r_i \dot{x_i} + \frac{1}{2} A_{ij} (x_i\dot{x_j}  +\dot{x_i} x_j) + 
+          \frac{1}{3} \sum_{ijk} B_{ijk} (\dot{x_i} x_j x_k + x_i \dot{x_j} x_k + x_i x_j \dot{x_k}) \\
+          = \sum_i r_i \dot{x_i} + A_{ij} x_i\dot{x_j}  + \sum_{ijk} \dot{x_i} B_{ijk}  x_j x_k       \\
+          = \sum_i \left(r_i + \sum_j A_{ij} x_j + \sum_{jk} B_{ijk} x_j x_k \right) \dot{x_i}
+$$
+
+One of the intermediate steps here is when considering this term: $\frac{1}{3} \sum_{ijk} B_{ijk} (\dot{x_i} x_j x_k + x_i \dot{x_j} x_k + x_i x_j \dot{x_k})$ which, because we are dealing with a symmetric tensor we have $B_{ijk} = B_{ikj} = B_{jik} = B_{jki} = B_{kij} = B_{kji}$ and hence for $x_i$ we have $x_i \rightarrow B_{ijk} \dot{x_i} x_j x_k + B_{jik} \dot{x_i} x_j x_k + B_{kij} \dot{x_i} x_j x_k$ and $x_j \rightarrow B_{ijk} x_i \dot{x_j} x_k + B_{jik} x_i \dot{x_j} x_k + B_{kij} x_i \dot{x_j} x_k$, and finally $x_k \rightarrow B_{ijk} x_i x_j \dot{x_k} + B_{jik} x_i x_j \dot{x_k} + B_{kij} x_i x_j \dot{x_k}$.
+
+With this simplified system in mind we can now investigate: 
+
+(i) how many equilibria are there? How many are stable? How many are feasible?
+(ii) Are there all but one globally stable? What does the basin of attraction look like? Are all possible equilibria locally stable? 
+
+
+**Analytical study of 3 species system with interaction modification**
+For a three species system with interaction modification a symmetric tensor we have a single parameter defining higher order interactions $b$. Other simplifying assumptions include equal growth rates for all species $r$ and intraspecific interactions given by a single parameter $a_1$ and interspecific interactions by another single parameter $a_2$
+
+
+
+
+### Detailed study of a 3 species system with purely interaction modification
+Case study for the $\alpha$ system, and a single parameter in the tensor. 
+For example, we can have a case for which $\alpha = 0$ is unstable and $\alpha = 1$ is also unstable, but are there instances for which intermediate values of $\alpha$ would lead to a stable equilibria?
+
+
+
+#### Some further explorations
+
+1. What if we impose a symmetry to the tensor such that the resulting Jacobian in a diagonal matrix + a symmetric matrix? What is the interpretation of this kind of model? 
+
+2. What other Lotka-Volterra systems have the same Jacobian?
+
+

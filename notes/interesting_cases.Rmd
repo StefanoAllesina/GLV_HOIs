@@ -29,7 +29,7 @@ outpairs <- integrate_dynamics(p, model = "glv")
 # dynamics pairwise + HOIs
 outhois <- integrate_dynamics(p, model = "glv_hois")
 # plot them together
-show(plot_output(outpairs$out, outhois$out))
+show(plot_output(outpairs, outhois))
 ```
 
 ### Stable pairwise, stable pairwise + HOIs (modification)
@@ -42,7 +42,7 @@ outpairs <- integrate_dynamics(p, model = "glv")
 # dynamics pairwise + HOIs
 outhois <- integrate_dynamics(p, model = "glv_hois")
 # plot them together
-show(plot_output(outpairs$out, outhois$out))
+show(plot_output(outpairs, outhois))
 ```
 
 ## Unstable pairwise, stable pairwise + HOIs (modification)
@@ -58,7 +58,7 @@ outpairs <- integrate_dynamics(p, model = "glv", maxtime = 200)
 # dynamics pairwise + HOIs
 outhois <- integrate_dynamics(p, model = "glv_hois", maxtime = 200)
 # plot them together
-show(plot_output(outpairs$out, outhois$out) + geom_point(data = tibble(time = 0, abundance = p$xstar, variable = as.factor(1:4), model = "second")))
+show(plot_output(outpairs, outhois) + geom_point(data = tibble(time = 0, abundance = p$xstar, variable = as.factor(1:4), model = "second")))
 ```
 
 This goes toward another stable equilibrium
@@ -74,7 +74,7 @@ outpairs <- integrate_dynamics(p, model = "glv", maxtime = 200)
 # dynamics pairwise + HOIs
 outhois <- integrate_dynamics(p, model = "glv_hois", maxtime = 200)
 # plot them together
-show(plot_output(outpairs$out, outhois$out) + geom_point(data = tibble(time = 0, abundance = p$xstar, variable = as.factor(1:4), model = "first")))
+show(plot_output(outpairs, outhois) + geom_point(data = tibble(time = 0, abundance = p$xstar, variable = as.factor(1:4), model = "first")))
 ```
 
 ### Neutral pairwise, unstable pairwise + HOIs (general)
@@ -87,7 +87,7 @@ outpairs <- integrate_dynamics(p, model = "glv")
 # dynamics pairwise + HOIs
 outhois <- integrate_dynamics(p, model = "glv_hois")
 # plot them together
-show(plot_output(outpairs$out, outhois$out))
+show(plot_output(outpairs, outhois))
 ```
 
 ### Neutral pairwise, stable pairwise + HOIs (general)
@@ -100,7 +100,7 @@ outpairs <- integrate_dynamics(p, model = "glv", maxtime = 400)
 # dynamics pairwise + HOIs
 outhois <- integrate_dynamics(p, model = "glv_hois", maxtime = 400)
 # plot them together
-show(plot_output(outhois$out,outpairs$out))
+show(plot_output(outhois,outpairs))
 ```
 
 
