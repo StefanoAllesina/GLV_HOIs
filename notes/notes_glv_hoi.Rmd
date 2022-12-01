@@ -1,5 +1,5 @@
 ---
-title: "A Conceptual Framework for Mechanistically understanding Higher Order Interactions"
+title: "Toward a Mechanistic Understanding of Higher-Order Interactions: A Conceptual Framework"
 author: "Allesina lab (Paulinha)"
 date: "`r Sys.Date()`"
 output: html_document
@@ -8,6 +8,145 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Mac Arthur's consumer resource model
+
+The consumer-resource framework was introduced by Robert MacArthur in 1969 (PNAS) and 1970 (TPB). We model two sets of species: $m$ resources, $y_i(t) \equiv y_i$, and $n$ consumers $x_i(t) \equiv x_i$. This flexible model can be written in general terms as:
+
+$$
+\begin{cases}
+\dot{x}_i = x_i(f_i(x_i) + g_i(x, y))\\
+\dot{y}_j = y_i(h_j(y_j) + l_j(x, y))
+\end{cases}
+$$
+where $\dot{x}_i$ is the derivative of the population density of species $x_i$ with respect to time $\dot{x}_i \equiv d x_i(t) / dt$, $x$ is a vector collecting the population densities of all consumers and $y$ of all resources. The simplest case is that in which $f_i(x_i) = -d_i$, $g_i(x, y) = \sum_{j} C_{ij} y_j$, $h_j(y_j) = a_j - b_j y_j$, and $l_j(x, y) = -\sum_i C_{ij} x_i$. In this case, the model is a the Generalized Lotka-Volterra model:
+
+$$
+\begin{cases}
+\dot{x}_i = x_i(-d_i + \sum_{j} C_{ij} y_j)\\
+\dot{y}_j = y_i(a_j - b_j y_j -\sum_i C_{ij} x_i)
+\end{cases}
+$$
+
+The fact that this is GLV can be seen by defining: 
+
+$$
+z = (x,y)^T,\quad s = (-d, a),\quad A = \begin{pmatrix} Z & C\\ -C^T & -D(b)\end{pmatrix}
+$$
+where $Z$ is a matrix of zeros of size $n \times m$, and $D(b)$ a diagonal matrix with vector $b$ on the diagonal. The model is GLV:
+
+$$
+\dot{z} = D(z)(s + A z)
+$$
+
+## Separation of time scales
+
+If the dynamics of resources are much faster than those of consumers (a common occurrence in natural systems), we can simplify the model into fast-slow subsystems. In particular, we can assume that the resources are always found at their steady-state level $\hat{y}$ for any configuration of consumer densities. This can be accomplished by solving:
+
+$$
+\frac{\dot{y}_j}{y_i} = a_j - b_j y_j -\sum_i C_{ij} x_i = 0
+$$
+
+Note that we are implicitly assuming that the resources will not go extinct through the dynamics, and can therefore reach their steady state value:
+
+$$
+\hat{y}_j = \frac{a_j}{b_j} -\sum_i \frac{C_{ij}}{b_j} x_i = 0
+$$
+
+We then obtain the slow system by plugging in the steady state value for the resources:
+
+\begin{equation}
+\dot{x} = D(x)(-d + C\hat{y}) = D(x)(-d + CD(b)^{-1}a - C D(b)^{-1}C^Tx) = D(x)(s + Ax)
+\label{eq:symmGLV}
+\end{equation}
+
+where:
+
+$$
+s = CD(b)^{-1}a - d, \quad A = -C D(b)^{-1}C^T
+$$
+
+Note that, whenever $b_i > 0\, \forall i$, then $A$ is a Gram matrix, and therefore symmetric and negative (semi-)definite. If the matrix $C$ has full row rank (i.e., it is of rank $n$, the number of consumers; equivalently, the number of resources equals or exceeds the number of consumers, and consumers' diets are linearly independent), then $A$ is negative definite. 
+
+Thus, the separation of time scales yields another Lotka-Volterra system, this time of size $n$ instead of $n + m$, and with symmetric interactions between the consumers. 
+
+As noted by MacArthur, the dynamics of the system in Eq. \ref{eq:symmGLV} maximize a certain quantity $V$ through the dynamics:
+
+$$
+V = s^Tx + \frac{1}{2} x^TAx
+$$
+
+Deriving with respect to time, we get:
+
+\begin{aligned}
+\dot{V} &= s^T\dot{x} + \frac{1}{2} (x^T A \dot{x} + \dot{x}^TAx)\\
+        &= s^T\dot{x} + \frac{1}{2} (x^T A \dot{x} + \dot{x}^TAx)\\
+        &= s^T\dot{x} + \frac{1}{2} (x^T A \dot{x} + x^T A^T \dot{x})\\
+        &= s^T\dot{x} + x^T A^T \dot{x}\\
+        &= (s+A x)^T\dot{x}\\
+        &= \dot{x}^T D(x)^{-1}\dot{x}\\
+        &= \sum_i \frac{\dot{x}_i^2}{x_i} \geq 0
+\end{aligned}
+
+Showing that $V$ always grows in time. It is also clear that whenever the dynamics reach one equilibrium, $\dot{V}=0$ and thus $V$ stops growing. Note that, because $A$ is negative (semi-definite), and is the Hessian of $V$ ($H_{ij} = \partial^2 V / (\partial x_i \partial x_j) = A_{ij}$), then the function $V$ has a single maximum (i.e., is a concave function). We conclude that dynamics will always reach an equilibrium---that maximizing $V(x^\star) = V^\star$.
+
+- We have a good argument on bounded dynamics (to make sure V cannot grow to infinity when x to infinity)
+- We need to show that if the coexistence equilibrium is feasible, then it is stable (this implies that the max V* is reached)
+- Explain that the globally stable equilibrium is unique, and can be on the boundary
+
+## Theta logistic
+
+In absence of consumer, the resources in Eq. \ref{eq:symmGLV} grow logistically:
+
+$$
+\dot{y}_i = y_i(a_i - b_i y_i)
+$$
+
+This model can be generalized by assuming that resources in the absence of consumers follow the "theta-logistic" growth:
+
+$$
+\dot{y}_i = y_i(a_i^\theta - (b_i y_i)^\theta)
+$$
+
+which has the same equilibria ($y_i^\star = 0,\, y_i^\star = a_i / b_i$) but different growth curves.
+
+```{r thetalogistic,warning=FALSE,message=FALSE,echo=FALSE, fig.cap="Growth curves for different values of $\\theta$; in all cases $y(0) = 1/10$, $a = 2^\\theta$ and $b = 1$. Note that the x-axis is in log scale."}
+library(deSolve)
+library(tidyverse)
+# different theta logistic curves with y* = 2, starting from y0 = 0.1
+thetalog <- function(t, x, pars){
+  return(list(
+    x * (2^pars$theta - x^pars$theta)
+  ))
+}
+
+thetas <- c("1/5", "1/6","1/4", "1/3", "1/2", "1", "2")
+thetavals <- sapply(thetas, function(x) eval(parse(text = x)))
+toplot <- tibble()
+for (i in 1:length(thetas)){
+  theta <- thetas[i]
+  thetaval <- thetavals[i]
+  out <- ode(y = 0.1, 
+             times = 10^(seq(0, 1.5, by = 0.01))-1,
+             func = thetalog, 
+             parms = list(theta = thetaval), 
+             method = "ode45")
+  toplot <- toplot %>% bind_rows(out %>% as.data.frame() %>% add_column(theta = theta))
+}
+ggplot(toplot) + 
+  aes(x = time, y = `1`, colour = theta) + 
+  geom_line() +
+  scale_x_log10() + 
+  scale_colour_brewer(name ="θ", palette = "Set1") + 
+  ylab("y(t)") + xlab("t")
+```
+
+## Separation of time scales with theta logistic yields HOIs
+
+## Extension of the Lyapunov function
+
+
+
 
 ## Framing the problems and intros
 One of the first population dynamical model is the Lotka-Volterra model and after over 100 years of its formulation we know a lot about it. From the many possible extensions of it, less is known about the role of considering higher order interactions in these systems. How many equilibria are there? How to solve them analytically?
