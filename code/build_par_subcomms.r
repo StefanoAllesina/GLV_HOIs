@@ -49,5 +49,8 @@ build_pars_subcomm = function(n, r, A, B){
     As[(n*(i-1)+1):(n*i),] = A_sub
     Bs[(n^2*(i-1)+1):(n^2*i),] = B_sub
   }
-  return(list(rs, As, Bs))
+  #save parameter sets to be read by the julia root finder
+  write.table(rs, "../data/rs.csv", col.names = F, row.names = F)
+  write.table(As, "../data/As.csv", col.names = F, row.names = F)
+  write.table(Bs, "../data/Bs.csv", col.names = F, row.names = F)
 }

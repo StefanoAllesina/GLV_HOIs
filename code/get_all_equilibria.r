@@ -18,12 +18,8 @@ B = list()
 B[[1]] = -matrix(runif(n^2), n, n)
 B[[2]] = -matrix(runif(n^2), n, n)
 B[[3]] = -matrix(runif(n^2), n, n)
-#build parameter sets for all subcommunities
-pars_subcomm = build_pars_subcomm(n, r, A, B)
-#save
-write.table(pars_subcomm[[1]], "../data/rs.csv", col.names = F, row.names = F)
-write.table(pars_subcomm[[2]], "../data/As.csv", col.names = F, row.names = F)
-write.table(pars_subcomm[[3]], "../data/Bs.csv", col.names = F, row.names = F)
+#build ans save parameter sets for all subcommunities
+build_pars_subcomm(n, r, A, B)
 #find all roots of the induced system of polynomials through homotopy continuation
 system( paste(path_to_julia, "find_roots.jl", as.character(n)) )
 #load all equilibria
