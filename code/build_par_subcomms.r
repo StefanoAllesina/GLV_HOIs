@@ -27,7 +27,7 @@ zeroed = function(r, A, B, spp_vec){
   return(list(r, A, B))
 }
 
-build_pars_subcomm(n, r, A, B){
+build_pars_subcomm = function(n, r, A, B){
   #get all combinations of species presence vectos
   present_combs = all_presence_combs(n)
   n_sub = 2^n-1

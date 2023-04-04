@@ -1,7 +1,12 @@
 #Example code on how to calculate the interior and all boundary equilibria of a GLV system with HOIs
 
-setwd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code") #change this to your local path
+#local paths to be changed by user
+setwd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code")
+path_to_julia = "/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia"
+
+#load auxiliary files
 source("build_par_subcomms.r")
+
 #number of species
 n = 3
 #growth rates
@@ -20,6 +25,6 @@ write.table(pars_subcomm[[1]], "../data/rs.csv", col.names = F, row.names = F)
 write.table(pars_subcomm[[2]], "../data/As.csv", col.names = F, row.names = F)
 write.table(pars_subcomm[[3]], "../data/Bs.csv", col.names = F, row.names = F)
 #find all roots of the induced system of polynomials through homotopy continuation
-system("/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia find_roots.jl 3")
+system( paste(path_to_julia, "find_roots.jl", as.character(n)) )
 #load all equilibria
 all_roots = read.csv("../data/roots.csv", sep = '\t', header = T)
