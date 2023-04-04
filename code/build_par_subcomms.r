@@ -1,3 +1,5 @@
+#Set of functions used in get_all_equilibria.r to build parameter set of all subcommunities
+
 all_presence_combs = function(n){
   #get all possible combinations of present species
   v = seq(n)
