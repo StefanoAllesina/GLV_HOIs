@@ -11,8 +11,6 @@ end
 n_spp = parse(Int64, ARGS[1])
 #number of parameter sets
 n_par_sets = 2^n_spp - 1
-#change working directory
-cd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code") #change this to your own path
 #read data
 rs = readdlm("../data/rs.csv")
 As = readdlm("../data/As.csv")

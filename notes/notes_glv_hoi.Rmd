@@ -3,7 +3,7 @@ title: "Toward a Mechanistic Understanding of Higher-Order Interactions: A Conce
 author: "Allesina lab (Paulinha)"
 date: "`r Sys.Date()`"
 output: html_document
----
+--- 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -142,6 +142,26 @@ ggplot(toplot) +
 ```
 
 ## Separation of time scales with theta logistic yields HOIs
+
+Mac Arthur's consumer resource model with theta logistic growing resources has the form
+
+$$
+\begin{align}
+\dot{y_i} &= y_i\left(a_i^{\theta} - (b_iy_i)^{\theta} - \sum_j C_{ij} x_j\right)\\
+\dot{x_j} &= x_j\left(-d_j + \sum_i  C_{ij}y_i\right).
+\end{align}
+$$
+Assuming feasibility of the resources ($y_i > 0 \ \forall i$) we can solve the resource equations by setting the terms inside the parenthesis to 0, and solving for $y_i$
+
+$$
+\begin{align}
+\hat{y_i} = \frac1b\left(a_i^{\theta} - \sum_j C_{ij} x_j\right)^{1/\theta}\\
+\end{align}
+$$
+For simplicity, we restrict our analysis to higher order interactions of second order, which arise when $\theta = \frac12$. In this case, the above expression takes the form
+$$
+\hat{y}_i = \frac1b\left(r_i^2 - 2\sum_{j<l}r_lC_{ij}x_j+\sum_j (C_{ij}x_j)^2 - 2 \sum_{j<l}C_{ij}C_{il}x_jx_l\right)
+$$
 
 ## Extension of the Lyapunov function
 
