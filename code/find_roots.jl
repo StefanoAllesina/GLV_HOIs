@@ -7,9 +7,16 @@ function poly_i(x, r, A, B, i)
     r[i] + dot(A[i,:], x) + dot(x, B[:, :, i]*x)
 end
 
+<<<<<<< HEAD
 #change working directory
 cd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code") #change this to your own path
 
+=======
+#number of species (common to all communities)
+n_spp = parse(Int64, ARGS[1])
+#number of parameter sets
+n_par_sets = 2^n_spp - 1
+>>>>>>> 297a62443ede20cb6ac4a7a64b7291271845c94f
 #read data
 #community index, simulation index, (sub)community diversity
 parser = readdlm("../data/parser.csv")

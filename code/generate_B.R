@@ -82,8 +82,14 @@ perm2comb = function(permutation, combinations){
 }
 
 get_symmetric_B = function(n){
+  ##############################################################################
   #Build a random symmetric tensor
-  #initialize 
+  #Parameters:
+    #n (int)
+  #Outputs:
+    #B (nxnxn array)
+  ##############################################################################
+  #initialize 3D array for B
   B = array(rep(0, n^3), dim = c(n,n,n))
   #Get all the possible different indices combinations
   vec_comb = combinations(n, 3, repeats.allowed=TRUE)
@@ -97,6 +103,8 @@ get_symmetric_B = function(n){
         current_permutation = c(i, j, k)
         #identify which of the combinations is this a permutation of
         ind_comb = perm2comb(current_permutation, vec_comb)
+        #assign the element corresponding to that combination to this 
+        #particular permutation
         B[i,j,k] = Bijk[ind_comb]
       }
     }
