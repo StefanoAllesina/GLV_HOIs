@@ -16,11 +16,13 @@ diversities = rep(c(3), each = simulations)
 
 #build parameters for different communities
 pars = stack_parameters(diversities)
+diversities = rep(rep(diversities, n_sub_vec), each = n_sim)
 
 #save parameter sets
 write.table(pars[[1]], "../data/rs.csv", col.names = F, row.names = F)
-write.table(pars[[1]], "../data/As.csv", col.names = F, row.names = F)
-write.table(pars[[1]], "../data/Bs.csv", col.names = F, row.names = F)
+write.table(pars[[2]], "../data/As.csv", col.names = F, row.names = F)
+write.table(pars[[3]], "../data/Bs.csv", col.names = F, row.names = F)
+write.table(diversities, "../data/diversities.csv", col.names = F, row.names = F)
 
 #find all roots of the induced system of polynomials through homotopy continuation
 system(paste(path_to_julia, "find_roots.jl", as.character(n)))
