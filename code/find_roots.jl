@@ -15,6 +15,36 @@ function get_index(index, unit_history)
     [from, to]
 end
 
+function solve_system(equations, presence)
+    #instantiate polynomial system 
+    F = System(equations)
+    #initialize variables
+    n_sols = nothing
+    sol_mat = nothing
+    try
+        #try to solve polynomial system
+        result = solve(F) #might throw error
+        #get number of real solutions
+        real_sols = real_solutions(result)
+        n_sols = size(real_sols, 1)
+        #preallocate n_sols rows of zeros to store solutions
+        sol_mat = zeros(n_sols, n_max)
+        #loop through solutions
+        for k in 1:n_sols
+            #use growth rate vector to find present species 
+            inds = findall(x->x!=0, presence)
+            #assign solutions to these positions
+            sol_mat[k,inds] = real_sols[k]
+        end
+    catch
+       #if error when solving the system, flag it as a row of -1s
+       n_sols = 1
+       sol_mat = -1*ones(Int, (n_sols, n_max))
+       println("couldn't find solutions of system")
+    end
+    n_sols, sol_mat
+end
+
 #change working directory
 cd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code") #change this to your own path
 
@@ -53,29 +83,17 @@ for i in 1:n_comms
         eqn = poly_i(x, r, A, B, j);
         append!(equations, eqn);
     end
-    #solve system and keep real solutions
-    F = System(equations)
-    result = solve(F)
-    real_sols = real_solutions(result)
-    #get number of solutions
-    n_sols = size(real_sols, 1)
-    #preallocate n_sols rows of zeros to store solutions
-    sol_mat = zeros(n_sols, n_max)
-    #loop through solutions
-    for k in 1:n_sols
-        #use growth rate vector to find present species 
-        inds = findall(x->x!=0, r)
-        #assign equilibria to these positions
-        sol_mat[k,inds] = real_sols[k]
-    end
-    #create column vectors with subcommunity number and diversity of ith community
+    #solve system
+    n_sols, sol_mat = solve_system(equations, r)
+    #create column vectors with iteration number and diversity of ith community
     global subcomm_ind = [subcomm_ind; repeat([i], n_sols)]
-    global n_spp_vec = [n_spp_vec; repeat([n_spp_i], n_sols)]    
+    global n_spp_vec = [n_spp_vec; repeat([n_spp_i], n_sols)] 
+    #store solutions in the global matrix   
     global all_eq_mat = hcat(all_eq_mat, sol_mat')
 end #for (i)
 #delete first column (of zeros) of matrix 
 all_eq_mat = all_eq_mat[:,2:end]
-#add columns subcommunity index and community diversity on the left
+#prepend columns iteration counter and community diversity
 all_eq_mat = hcat(subcomm_ind, n_spp_vec, all_eq_mat')
 #save them (by rows)
 writedlm("../data/roots.csv", all_eq_mat)

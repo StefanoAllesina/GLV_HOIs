@@ -147,10 +147,10 @@ subcomm_expand = function(all_parameters, diversities){
   #get size of biggest community and number of communities
   n_max = max(diversities)
   n_com = length(diversities)
-  #build a diversity vector matching dimensions of data with subcommunities
-  diversities_sub = rep(rep(diversities, n_sub_vec), each = simulations)
   #number of subcommunities in each community
   n_sub_vec = 2^diversities-1
+  #build a diversity vector matching dimensions of data with subcommunities
+  diversities_sub = rep(diversities, n_sub_vec)
   #place holder for all expanded parameter families
   r_expanded = matrix(0, nrow = sum(n_sub_vec), ncol = n_max)
   A_expanded = matrix(0, nrow = sum(n_sub_vec*diversities), ncol = n_max)
