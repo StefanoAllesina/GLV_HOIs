@@ -128,9 +128,9 @@ stack_parameters = function(diversities){
 	    par_set = sample_parameter_set(n)
 	    #store
 	    r_stacked[i, 1:n] = par_set[[1]]
-      ind_A = get_indices(i, diversities)
+	    ind_A = get_indices(i, diversities)
 	    A_stacked[ind_A[1]:(ind_A[2]), 1:n] = par_set[[2]]
-      ind_B = get_indices(i, diversities^2)
+	    ind_B = get_indices(i, diversities^2)
 	    B_stacked[ind_B[1]:(ind_B[2]), 1:n] = par_set[[3]]
 	  }
     return(list(r_stacked, A_stacked, B_stacked))
@@ -147,6 +147,8 @@ subcomm_expand = function(all_parameters, diversities){
   #get size of biggest community and number of communities
   n_max = max(diversities)
   n_com = length(diversities)
+  #build a diversity vector matching dimensions of data with subcommunities
+  diversities_sub = rep(rep(diversities, n_sub_vec), each = simulations)
   #number of subcommunities in each community
   n_sub_vec = 2^diversities-1
   #place holder for all expanded parameter families
@@ -178,5 +180,5 @@ subcomm_expand = function(all_parameters, diversities){
     curr_ind_A = curr_ind_A + n_sub*n
     curr_ind_B = curr_ind_B + n_sub*n^2
   }
-  return(list(r_expanded, A_expanded, B_expanded))
+  return(list(r_expanded, A_expanded, B_expanded, diversities_sub))
 }

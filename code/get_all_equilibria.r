@@ -1,39 +1,42 @@
 #Calculate all equilibria of a colection of GLV systems with HOIs
 
 #local paths to be changed by user
-setwd("~/Desktop/GLV_HOIs/code")
+setwd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code")
 #find the path to the julia executable in your machine by running the following 
 #command in a julia REPL
 #julia> println(Sys.BINDIR)
-path_to_julia = "/home/pablo/julia-1.8.3/bin/julia"
+path_to_julia = "/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia"
+#path_to_julia = "/Users/pablo/julia-1.8.3/bin/julia"
 
 #load auxiliary functions to build parameter sets
 source("build_parameter_sets.r")
 
 #specify simulation number and diversity levels
 simulations = 2
-diversities = rep(c(3), each = simulations)
+diversities = rep(c(3, 4), each = simulations)
 
-#build parameters for different communities
+#stack parameters sets of different communities
 pars = stack_parameters(diversities)
-diversities = rep(rep(diversities, n_sub_vec), each = n_sim)
+
+#get subcommunities of each community
+pars_subcomm = subcomm_expand(pars, diversities)
 
 #save parameter sets
-write.table(pars[[1]], "../data/rs.csv", col.names = F, row.names = F)
-write.table(pars[[2]], "../data/As.csv", col.names = F, row.names = F)
-write.table(pars[[3]], "../data/Bs.csv", col.names = F, row.names = F)
-write.table(diversities, "../data/diversities.csv", col.names = F, row.names = F)
+write.table(pars_subcomm[[1]], "../data/rs.csv", col.names = F, row.names = F)
+write.table(pars_subcomm[[2]], "../data/As.csv", col.names = F, row.names = F)
+write.table(pars_subcomm[[3]], "../data/Bs.csv", col.names = F, row.names = F)
+write.table(pars_subcomm[[4]], "../data/diversities.csv", col.names = F, row.names = F)
 
 #find all roots of the induced system of polynomials through homotopy continuation
-system(paste(path_to_julia, "find_roots.jl", as.character(n)))
-
-#load all equilibria
-all_roots = read.csv("../data/roots.csv", sep = '\t', header = T)
+system(paste(path_to_julia, "find_roots.jl"))
 
 #create column names
-spp_names = unlist(lapply(seq(n), paste, 'spp', sep = ""))
-col_names = c('sub_comm', spp_names)
+spp_names = unlist(lapply(seq(max(diversities)), paste, 'spp', sep = ""))
+col_names = c('solution_ind', 'diversity', spp_names)
 
 #load all equilibria
-all_roots = read.csv("../data/roots.csv", sep = '\t', header = T,
+all_roots = read.csv("../data/roots.csv", sep = '\t', header = F,
                      col.names = col_names, check.names = F)
+
+#merge with rest of parameter data 
+data = c(all_roots, data.frame('simulation' = ))
