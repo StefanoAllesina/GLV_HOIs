@@ -21,6 +21,8 @@
 #add diversity of subcommunities
 #diversity[curr_ind_r:(curr_ind_r + n_sub - 1)] = pars_subcomm[[4]]
 
+library(gtools)
+
 all_presence_combs = function(n){
   #get all possible species combinations
   #n = 3 will give (1), (2), (3), (1,2), (1,3), (2,3), (1,2,3)
@@ -86,21 +88,80 @@ build_pars_subcomm = function(n, r, A, B){
   return(list(rs, As, Bs, n_spp_vec))
 }
 
-sample_parameter_set = function(n){
-    #sample parameter set with n species
-    #kept as separate function to implement constraints modularly
+is_permutation = function(vec1, vec2){
+  #Check if vec1 is a permutation of vec2
+  return(all(sort(vec1) == sort(vec2)))
+}
 
-    #growth rates
-    r = runif(n)
+perm2comb = function(permutation, combinations){
+  #given a list of combinations and a permutation of one of these, identify 
+  #which combination does permutation correspond to
+
+  n_comb = nrow(combinations)
+  for (i in seq(n_comb)){
+    current_comb = combinations[i,]
+    perm_is_comb = is_permutation(current_comb, permutation)
+    if (perm_is_comb){
+      return(i)
+    }
+  }
+}
+
+get_symmetric_B = function(n){
+  #Build a random symmetric tensor
+  #Parameters:
+    #n (int)
+  #Outputs:
+    #B (nxnxn array)
+
+  #initialize 3D array for B
+  B = array(rep(0, n^3), dim = c(n,n,n))
+  #Get all the possible different indices combinations
+  vec_comb = combinations(n, 3, repeats.allowed=TRUE)
+  n_comb = nrow(vec_comb)
+  #Assign random values to unique elements
+  Bijk = runif(n_comb)
+  for (i in seq(n)){
+    for (j in seq(n)){
+      for (k in seq(n)){
+        #form a vector of indices
+        current_permutation = c(i, j, k)
+        #identify which of the combinations is this a permutation of
+        ind_comb = perm2comb(current_permutation, vec_comb)
+        #assign the element corresponding to that combination to this 
+        #particular permutation
+        B[i,j,k] = Bijk[ind_comb]
+      }
+    }
+  }
+  return(B)
+  }
+
+sample_parameter_set = function(n, constraints = 'random'){
+  #sample parameter set with n species
+  #kept as separate function to implement constraints modularly
+  
+  #sample sgrowth rates
+  r = runif(n)
+  #sample A and B from uniform distribution
+  if (constraints == 'random'){
     #interaction matrix
     A = matrix(runif(n^2), n, n)
     #tensor of HOIs
     B = list()
-    B[[1]] = -matrix(runif(n^2), n, n)
-    B[[2]] = -matrix(runif(n^2), n, n)
-    B[[3]] = -matrix(runif(n^2), n, n)
+    B[[1]] = matrix(runif(n^2), n, n)
+    B[[2]] = matrix(runif(n^2), n, n)
+    B[[3]] = matrix(runif(n^2), n, n)
     B_mat = matrix(unlist(B), nrow = n^2, ncol = n)
-    return(list(r, A, B_mat))
+  }
+  #sample symmetric A and B symmetric from uniform distribution
+  else if (constraints == 'symmetric'){
+    A_1 = matrix(runif(n^2), n, n)
+    A = 1/2*(A_1 + t(A_1))
+    B_mat = matrix(unlist(get_symmetric_B(n)), nrow = n^2, ncol = n)
+  }
+  
+  return(list(r, A, B_mat))
 }
 
 get_indices = function(index, unit_history){
@@ -111,8 +172,9 @@ get_indices = function(index, unit_history){
     return(c(from, to))
 }
 
-stack_parameters = function(diversities){
-    #Given a bunch of parameter sets (r, A, B), stack them into a common table
+sample_stack_par = function(diversities, sampling_constr){
+    #Sample parameter sets (r, A, B) according to constraints and 
+    #stack them into a common table
 
     #get largest community and number of communities 
     n_max = max(diversities)
@@ -125,7 +187,7 @@ stack_parameters = function(diversities){
     for (i in seq(n_com)){
     	n = diversities[i]
 	    #sample parameters
-	    par_set = sample_parameter_set(n)
+	    par_set = sample_parameter_set(n, sampling_constr)
 	    #store
 	    r_stacked[i, 1:n] = par_set[[1]]
 	    ind_A = get_indices(i, diversities)
@@ -181,4 +243,14 @@ subcomm_expand = function(all_parameters, diversities){
     curr_ind_B = curr_ind_B + n_sub*n^2
   }
   return(list(r_expanded, A_expanded, B_expanded, diversities_sub))
+}
+
+save_parameter_set = function(parameter_set, output_name){
+    n_pars = length(parameter_set)
+    for (i in seq(n_pars)){
+	write.table(parameter_set[[i]], 
+		    paste("../data/pars_", as.character(i), "_", output_name, ".csv", 
+			  sep = ""),
+		    col.names = F, row.names = F)
+    }
 }

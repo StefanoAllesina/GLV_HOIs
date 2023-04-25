@@ -2,9 +2,14 @@ using HomotopyContinuation #to solve system of polynomials
 using LinearAlgebra #to compute dot products
 using DelimitedFiles #to load and save files
 
-function poly_i(x, r, A, B, i)
-    #given parameters, construct glv_hoi system of polynomial equations
-    r[i] + dot(A[i,:], x) + dot(x, B[:, :, i]*x)
+function read_data(file_suffix)
+    #read data given the number of parameter types and the suffix of files 
+    rs = readdlm("../data/pars_1_"*file_suffix*".csv") #growth rates
+    As = readdlm("../data/pars_2_"*file_suffix*".csv") #pairwise
+    Bs = readdlm("../data/pars_3_"*file_suffix*".csv") #three-way 
+    # diversities of each comm
+    diversities = readdlm("../data/pars_4_"*file_suffix*".csv") 
+    rs, As, Bs, diversities
 end
 
 function get_index(index, unit_history)
@@ -13,6 +18,11 @@ function get_index(index, unit_history)
     from = Int16(sum(unit_history[1:index-1]) + 1)
     to = Int16(from + unit_history[index] - 1)
     [from, to]
+end
+
+function poly_i(x, r, A, B, i)
+    #given parameters, construct glv_hoi system of polynomial equations
+    r[i] + dot(A[i,:], x) + dot(x, B[:, :, i]*x)
 end
 
 function solve_system(equations, presence)
@@ -45,15 +55,10 @@ function solve_system(equations, presence)
     n_sols, sol_mat
 end
 
-#change working directory
-cd("/Users/pablolechon/Desktop/phd/GLV_HOIs/code") #change this to your own path
-
+#parse of output parameter file name suffix spedifying parameter constraints
+output_name = ARGS[1]
 #read data
-#load growth rates, pairwise, three-way interactions, diversities of each comm
-rs = readdlm("../data/rs.csv")
-As = readdlm("../data/As.csv")
-Bs = readdlm("../data/Bs.csv")
-diversities = readdlm("../data/diversities.csv")
+rs, As, Bs, diversities = read_data(output_name)
 #total number of communities and biggest community
 n_comms = size(diversities,1)
 n_max = Int16(maximum(diversities))
@@ -61,7 +66,7 @@ n_max = Int16(maximum(diversities))
 global all_eq_mat = Array{Float64}(undef, n_max)
 global subcomm_ind = Vector{Float64}()
 global n_spp_vec = Vector{Float64}()
-#iterate through parameter sets (either communities or subcommunities)
+#iterate through parameter sets of each (sub)community
 for i in 1:n_comms
     #number of species in the ith (sub)community
     n_spp_i = Int16(diversities[i])
@@ -95,5 +100,5 @@ end #for (i)
 all_eq_mat = all_eq_mat[:,2:end]
 #prepend columns iteration counter and community diversity
 all_eq_mat = hcat(subcomm_ind, n_spp_vec, all_eq_mat')
-#save them (by rows)
-writedlm("../data/roots.csv", all_eq_mat)
+#save them by rows
+writedlm("../data/roots_"*output_name*".csv", all_eq_mat)
