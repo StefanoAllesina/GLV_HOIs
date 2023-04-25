@@ -9,7 +9,9 @@ function read_data(file_suffix)
     Bs = readdlm("../data/pars_3_"*file_suffix*".csv") #three-way 
     # diversities of each comm
     diversities = readdlm("../data/pars_4_"*file_suffix*".csv") 
-    rs, As, Bs, diversities
+    #species pool vector
+    pools = readdlm("../data/pars_5_"*file_suffix*".csv") 
+    rs, As, Bs, diversities, pools
 end
 
 function get_index(index, unit_history)
@@ -29,8 +31,8 @@ function solve_system(equations, presence)
     #instantiate polynomial system 
     F = System(equations)
     #initialize variables
-    n_sols = nothing
-    sol_mat = nothing
+    n_sols = Array{Int64}(undef)
+    sol_mat = Array{Float64}(undef, 0)
     try
         #try to solve polynomial system
         result = solve(F) #might throw error
@@ -58,18 +60,28 @@ end
 #parse of output parameter file name suffix spedifying parameter constraints
 output_name = ARGS[1]
 #read data
-rs, As, Bs, diversities = read_data(output_name)
+rs, As, Bs, diversities, pools = read_data(output_name)
 #total number of communities and biggest community
 n_comms = size(diversities,1)
 n_max = Int16(maximum(diversities))
 #vector with column names of equilibria matrix
 global all_eq_mat = Array{Float64}(undef, n_max)
-global subcomm_ind = Vector{Float64}()
+#vector with community diversity
 global n_spp_vec = Vector{Float64}()
+#vector with solution number
+global sol_id = Vector{Int64}()
+#vector labeling species pool (common to a community and all subcommunities)
+global pool_id_vec = Vector{Int64}()
 #iterate through parameter sets of each (sub)community
 for i in 1:n_comms
+    print("Community: ")
+    print(i)
+    print(", Diversity: ")
+    println(diversities[i])
     #number of species in the ith (sub)community
     n_spp_i = Int16(diversities[i])
+    #assign pool id for this iteration
+    pool_id_i = Int16(pools[i])
     #get indices for subsetting A and B
     ind_A = get_index(i, diversities)
     ind_B = get_index(i, diversities.^2)
@@ -90,15 +102,17 @@ for i in 1:n_comms
     end
     #solve system
     n_sols, sol_mat = solve_system(equations, r)
-    #create column vectors with iteration number and diversity of ith community
-    global subcomm_ind = [subcomm_ind; repeat([i], n_sols)]
+    #create column vectors with solution id, diversity of ith community, 
+    #and species pool id	
+    global sol_id = [sol_id; repeat([i], n_sols)]
     global n_spp_vec = [n_spp_vec; repeat([n_spp_i], n_sols)] 
+    global pool_id_vec = [pool_id_vec; repeat([pool_id_i], n_sols)] 
     #store solutions in the global matrix   
     global all_eq_mat = hcat(all_eq_mat, sol_mat')
 end #for (i)
 #delete first column (of zeros) of matrix 
 all_eq_mat = all_eq_mat[:,2:end]
 #prepend columns iteration counter and community diversity
-all_eq_mat = hcat(subcomm_ind, n_spp_vec, all_eq_mat')
+all_eq_mat = hcat(sol_id, n_spp_vec, pool_id_vec, all_eq_mat')
 #save them by rows
 writedlm("../data/roots_"*output_name*".csv", all_eq_mat)

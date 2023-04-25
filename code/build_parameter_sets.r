@@ -3,24 +3,6 @@
 #from each community. The goal is to build a data strucutre that can be 
 #used by Julia to find all the roots at once.
 
-#GET RID OF DIVERSITY CALCULATION IF NOT NEEDED
-####################################################################
-#maybe use this chunk later for merging roots and community parameters
-####################################################################
-##create indexing vectors to parse parameter sets efficiently in julia
-#community = rep(rep(seq(n_com), n_sub_vec), each = n_sim)
-#diversity = rep(rep(n_vec, n_sub_vec), each = n_sim)
-#simulation = c()
-#for (i in seq(n_com)){
-#    vec = rep(seq(n_sim), each = n_sub_vec[i])
-#    simulation = c(simulation, vec)
-#}
-##################################################################
-#diversity junk code
-##################################################################
-#add diversity of subcommunities
-#diversity[curr_ind_r:(curr_ind_r + n_sub - 1)] = pars_subcomm[[4]]
-
 library(gtools)
 
 all_presence_combs = function(n){
@@ -213,6 +195,9 @@ subcomm_expand = function(all_parameters, diversities){
   n_sub_vec = 2^diversities-1
   #build a diversity vector matching dimensions of data with subcommunities
   diversities_sub = rep(diversities, n_sub_vec)
+  #build a species pool vector, common to each community and corresponding
+  #subcommunities
+  pool_vec = rep(seq(n_com), times = 2^(diversities)-1)
   #place holder for all expanded parameter families
   r_expanded = matrix(0, nrow = sum(n_sub_vec), ncol = n_max)
   A_expanded = matrix(0, nrow = sum(n_sub_vec*diversities), ncol = n_max)
@@ -242,7 +227,7 @@ subcomm_expand = function(all_parameters, diversities){
     curr_ind_A = curr_ind_A + n_sub*n
     curr_ind_B = curr_ind_B + n_sub*n^2
   }
-  return(list(r_expanded, A_expanded, B_expanded, diversities_sub))
+  return(list(r_expanded, A_expanded, B_expanded, diversities_sub, pool_vec))
 }
 
 save_parameter_set = function(parameter_set, output_name){
