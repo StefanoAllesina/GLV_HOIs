@@ -14,3 +14,8 @@ Test how the program behaves when given an error in the homotopy continuation so
 Download VSCode for ubuntu (find a way to instal deb files from terminal)
 Find a way to debug julia in VSCode
 
+
+#### Apr 26,2023
+
+fixed bug in julia
+installed VSCode in my machine

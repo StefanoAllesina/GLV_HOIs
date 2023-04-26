@@ -38,5 +38,8 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-#Ignore julia files (for now)
-*.jl
+#Ignore personal research log
+research_log.txt
+
+#Ignore big data files
+

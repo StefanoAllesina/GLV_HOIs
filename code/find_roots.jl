@@ -17,8 +17,8 @@ end
 function get_index(index, unit_history)
     #given the community number, and the richness previous communities
     #calculate the start index of such community in the parameter sets.
-    from = Int16(sum(unit_history[1:index-1]) + 1)
-    to = Int16(from + unit_history[index] - 1)
+    from = Int64(sum(unit_history[1:index-1]) + 1)
+    to = Int64(from + unit_history[index] - 1)
     [from, to]
 end
 
@@ -74,10 +74,6 @@ global sol_id = Vector{Int64}()
 global pool_id_vec = Vector{Int64}()
 #iterate through parameter sets of each (sub)community
 for i in 1:n_comms
-    print("Community: ")
-    print(i)
-    print(", Diversity: ")
-    println(diversities[i])
     #number of species in the ith (sub)community
     n_spp_i = Int16(diversities[i])
     #assign pool id for this iteration
