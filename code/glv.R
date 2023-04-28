@@ -1,7 +1,7 @@
 library(deSolve) # to integrate ODEs
 library(tidyverse) # plotting
-source("generate_pars.R")
-THRESH <- 10^-10 # consider extinct if below the threshold
+#source("generate_pars.R")
+THRESH <- 10^-5 # consider extinct if below the threshold
 
 # parameter structure:
 # r: vector of growth rates (n)

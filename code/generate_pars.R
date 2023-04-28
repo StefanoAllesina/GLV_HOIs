@@ -1,3 +1,5 @@
+source("glv.R")
+
 build_GLV_HOIs <- function(n, mode = "stable", HOIs = "modification", zerosumBi = TRUE){
   # step 1:
   # find a feasible GLV that is locally stable, neutrally stable, or unstable
@@ -47,7 +49,7 @@ build_GLV_HOIs <- function(n, mode = "stable", HOIs = "modification", zerosumBi 
       # divide each element
       Bi <- Bi / xxt
       B[[i]] <- Bi
-    } 
+    }
   } else{
       # in this case, any weighted average of pairwise and hois does not modify equilibrium
       B <- list()
@@ -150,4 +152,4 @@ test_pars <- function(n=4){
   # growth rates at equilibrium (HOIs model)
   print(round(unlist(glv_hois(0, ph$xstar, ph), 15)))
 }
-
+test_pars(3)

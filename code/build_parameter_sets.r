@@ -1,9 +1,12 @@
 #Set of functions used in get_all_equilibria.r to build parameter sets of
 #different communities and, if desired, of all possible subcommunities 
 #from each community. The goal is to build a data strucutre that can be 
-#used by Julia to find all the roots at once.
+#used by Julia to find all the roots at once. Additionally, there are also
+#functions to sample tensor B with different constraints. All samples are
+#done from a normal distribution with mean 0 and sigma 0.1
 
 library(gtools)
+source("generate_B.R") #sample symmetric and constrained B
 
 all_presence_combs = function(n){
   #get all possible species combinations
@@ -70,56 +73,8 @@ build_pars_subcomm = function(n, r, A, B){
   return(list(rs, As, Bs, n_spp_vec))
 }
 
-is_permutation = function(vec1, vec2){
-  #Check if vec1 is a permutation of vec2
-  return(all(sort(vec1) == sort(vec2)))
-}
-
-perm2comb = function(permutation, combinations){
-  #given a list of combinations and a permutation of one of these, identify 
-  #which combination does permutation correspond to
-
-  n_comb = nrow(combinations)
-  for (i in seq(n_comb)){
-    current_comb = combinations[i,]
-    perm_is_comb = is_permutation(current_comb, permutation)
-    if (perm_is_comb){
-      return(i)
-    }
-  }
-}
-
-get_symmetric_B = function(n){
-  #Build a random symmetric tensor
-  #Parameters:
-    #n (int)
-  #Outputs:
-    #B (nxnxn array)
-
-  #initialize 3D array for B
-  B = array(rep(0, n^3), dim = c(n,n,n))
-  #Get all the possible different indices combinations
-  vec_comb = combinations(n, 3, repeats.allowed=TRUE)
-  n_comb = nrow(vec_comb)
-  #Assign random values to unique elements
-  Bijk = runif(n_comb)
-  for (i in seq(n)){
-    for (j in seq(n)){
-      for (k in seq(n)){
-        #form a vector of indices
-        current_permutation = c(i, j, k)
-        #identify which of the combinations is this a permutation of
-        ind_comb = perm2comb(current_permutation, vec_comb)
-        #assign the element corresponding to that combination to this 
-        #particular permutation
-        B[i,j,k] = Bijk[ind_comb]
-      }
-    }
-  }
-  return(B)
-  }
-
-sample_parameter_set = function(n, constraints = 'random'){
+sample_parameter_set = function(n, constraints = 'random',
+				stability = 'random'){
   #sample parameter set with n species
   #kept as separate function to implement constraints modularly
   
@@ -128,7 +83,7 @@ sample_parameter_set = function(n, constraints = 'random'){
   #sample A and B from uniform distribution
   if (constraints == 'random'){
     #interaction matrix
-    A = matrix(runif(n^2), n, n)
+    A = matrix(rnorm(n^2, 0, 0.1), n, n)
     #tensor of HOIs
     B = list()
     B[[1]] = matrix(runif(n^2), n, n)
@@ -138,11 +93,39 @@ sample_parameter_set = function(n, constraints = 'random'){
   }
   #sample symmetric A and B symmetric from uniform distribution
   else if (constraints == 'symmetric'){
-    A_1 = matrix(runif(n^2), n, n)
+    A_1 = matrix(rnorm(n^2, 0, 0.1), n, n)
     A = 1/2*(A_1 + t(A_1))
-    B_mat = matrix(unlist(get_symmetric_B(n)), nrow = n^2, ncol = n)
+    B_mat = matrix(unlist(sample_symmetric_B(n)), nrow = n^2, ncol = n)
   }
-  
+  #sample parameters to preserve equilibrium. any weighted average of 
+  #pairwise and hois does not modify equilibrium (implemented by stefano)
+  else if (constraints == 'prerserving_sa'){
+    #sample feasible equilibrium to preserve
+    x <- abs(rnorm(n))
+    #initialize B
+    B <- list()
+    #get xx^T
+    xxt <- x %o% x
+    for (i in 1:n){
+      Bi <- matrix(rnorm(n * n, 0, 0.1), n, n)
+      # make upper-triangular
+      Bi <- Bi + t(Bi) - diag(diag(Bi))
+      Bi[lower.tri(Bi)] <- 0
+      # subtract mean
+      Bi[Bi !=0] <- Bi[Bi !=0] - mean(Bi[Bi !=0])
+      # divide each element
+      Bi <- Bi / xxt
+      B[[i]] <- Bi
+  }
+
+  #same case implemented by pablo
+  else if (constraints == 'prerserving_pla'){
+    #sample r
+    r = runif(n)
+    #get column sum vector
+    row_sums = -alpha *r
+    B = sample_preserving_B(row_sums, n)
+  }
   return(list(r, A, B_mat))
 }
 

@@ -10,7 +10,7 @@ get_Q = function(sum_vec, n, tol = 1e-10, max_it = 100){
     #Q (nxn array)
   ##############################################################################
   #sample i.i.d. matrix
-  M = matrix(runif(n^2), n, n)
+  M = matrix(rnorm(n^2, 0, 0.1), n, n)
   err = 1
   it = 0
   #make M doubly stochastic
@@ -26,7 +26,7 @@ get_Q = function(sum_vec, n, tol = 1e-10, max_it = 100){
     it = it + 1
     if (it > max_it){
       #non convergence, start over
-      M = matrix(runif(n^2), n, n)
+      M = matrix(rnorm(n^2, 0, 0.1), n, n)
       it = 0
       err = 1
     }
@@ -48,14 +48,14 @@ get_B = function(Q, n){
   B = vector(mode = "list", length = n)
   for (i in seq(n)){
     for (j in seq(n)){
-      Mi = matrix(runif(n^2), n,n)
+      Mi = matrix(rnorm(n^2, 0, 0.1), n,n)
       B[[i]] = Mi/rowSums(Mi)*Q[,i]
     }
   }
   return(B)
 }
 
-sample_B = function(row_sums, n){
+sample_preserving_B = function(row_sums, n){
   #get matrix Q
   Q = get_Q(row_sums, n)
   #get tensor B
@@ -81,7 +81,7 @@ perm2comb = function(permutation, combinations){
   }
 }
 
-get_symmetric_B = function(n){
+sample_symmetric_B = function(n){
   ##############################################################################
   #Build a random symmetric tensor
   #Parameters:
@@ -95,7 +95,7 @@ get_symmetric_B = function(n){
   vec_comb = combinations(n, 3, repeats.allowed=TRUE)
   n_comb = nrow(vec_comb)
   #Assign random values to unique elements
-  Bijk = runif(n_comb)
+  Bijk = rnorm(n_comb, 0, 0.1)
   for (i in seq(n)){
     for (j in seq(n)){
       for (k in seq(n)){
@@ -120,8 +120,8 @@ test = function(){
   r = runif(n)
   #get column sum vector
   row_sums = -alpha *r
-  B = sample_B(row_sums, n)
-  B_symm = get_symmetric_B(n)
+  B = sample_preserving_B(row_sums, n)
+  B_symm = sample_symmetric_B(n)
   return(list(B, B_symm))
 }
 
