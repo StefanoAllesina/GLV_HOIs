@@ -4,13 +4,15 @@ library("tidyverse")
 source("jacobian.R")
 source("build_parameter_sets.r")
 
+#set type of simulations to analyze
 par_type = 'random'
 #load data
-data = read.csv("../data/roots_symmetric.csv" )
-rs = read.csv("../data/pars_1_symmetric.csv", header = F, sep = ' ')
-As = read.csv("../data/pars_2_symmetric.csv", header = F, sep = ' ')
-Bs = read.csv("../data/pars_3_symmetric.csv", header = F, sep = ' ')
-diversities = read.csv("../data/pars_4_symmetric.csv", header = F, sep = ' ')
+data = read.csv(paste("../data/roots_", par_type, ".csv", sep = "" ))
+rs = read.csv(paste("../data/pars_1_", par_type, ".csv", sep = ""), header = F, sep = ' ')
+As = read.csv(paste("../data/pars_2_", par_type, ".csv", sep = ""), header = F, sep = ' ')
+Bs = read.csv(paste("../data/pars_3_", par_type, ".csv", sep = ""), header = F, sep = ' ')
+diversities = read.csv(paste("../data/pars_4_", par_type, ".csv", sep = ""), 
+                       header = F, sep = ' ')
 #get only indices of parameter sets that yielded at least one equilibrium
 realized_comms = unique(data$par_set_id)
 realized_diversities = diversities[realized_comms,]

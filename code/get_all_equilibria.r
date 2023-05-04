@@ -4,14 +4,14 @@
 #find the path to the julia executable in your machine by running the following 
 #command in a julia REPL
 #julia> println(Sys.BINDIR)
-#path_to_julia = "/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia" #for my mac
-path_to_julia = "/home/pablo/julia-1.8.3/bin/julia" #for my desktop
+path_to_julia = "/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia" #for my mac
+#path_to_julia = "/home/pablo/julia-1.8.3/bin/julia" #for my desktop
 
 #load auxiliary functions to build parameter sets
 source("build_parameter_sets.r")
 
 #specify simulation number and diversity levels
-simulations = 100
+simulations = 1000
 diversities = c(3, 4, 5, 6, 7, 8, 9, 10)
 div_sim = rep(diversities, each = simulations)
 par_type = 'random'
