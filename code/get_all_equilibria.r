@@ -11,23 +11,26 @@ path_to_julia = "/home/pablo/julia-1.8.3/bin/julia" #for my desktop
 source("build_parameter_sets.r")
 
 #specify simulation number and diversity levels
-simulations = 10
-diversities = c(3, 6, 9)
+simulations = 100
+diversities = c(3, 4, 5, 6, 7, 8, 9, 10)
 div_sim = rep(diversities, each = simulations)
-par_type = 'symmetric'
+par_type = 'random'
 
 #sample and stack parameters sets of different communities
 pars = sample_stack_par(div_sim, par_type)#A and B are symmetric
 #get subcommunities of each community
-pars_subcomm = subcomm_expand(pars, div_sim)
+#pars_subcomm = subcomm_expand(pars, div_sim)
 #save parameter sets
-save_parameter_set(pars_subcomm, par_type)
+save_parameter_set(pars, par_type)
 #find all roots of the induced system of polynomials through homotopy continuation
 system(paste(path_to_julia, "find_roots.jl", par_type))
-#create column names
-spp_names = unlist(lapply(seq(max(diversities)), paste, 'spp', sep = ""))
-col_names = c('solution_id', 'diversity', 'pool',  spp_names)
-#load all equilibria
+#create column names and save file
+spp_names = seq(max(diversities))
+col_names = c('pool_div', 'pool_id', 'par_set_id',  spp_names)
 all_roots = read.csv(paste("../data/roots_", par_type, ".csv", sep = ""), 
                      sep = '\t', header = F,
-                     col.names = col_names, check.names = F)
+	       	     col.names = col_names, check.names = F)
+#save clean data
+write.csv(all_roots, paste("../data/roots_", par_type, ".csv", sep = ""), 
+	  row.names = F)
+

@@ -67,11 +67,11 @@ n_max = Int16(maximum(diversities))
 #vector with column names of equilibria matrix
 global all_eq_mat = Array{Float64}(undef, n_max)
 #vector with community diversity
-global n_spp_vec = Vector{Float64}()
-#vector with solution number
-global sol_id = Vector{Int64}()
+global pool_div = Vector{Float64}()
+#vector with id of parameter set
+global par_set_id = Vector{Int64}()
 #vector labeling species pool (common to a community and all subcommunities)
-global pool_id_vec = Vector{Int64}()
+global pool_id = Vector{Int64}()
 #iterate through parameter sets of each (sub)community
 for i in 1:n_comms
     #number of species in the ith (sub)community
@@ -100,15 +100,15 @@ for i in 1:n_comms
     n_sols, sol_mat = solve_system(equations, r)
     #create column vectors with solution id, diversity of ith community, 
     #and species pool id	
-    global sol_id = [sol_id; repeat([i], n_sols)]
-    global n_spp_vec = [n_spp_vec; repeat([n_spp_i], n_sols)] 
-    global pool_id_vec = [pool_id_vec; repeat([pool_id_i], n_sols)] 
+    global par_set_id = [par_set_id; repeat([i], n_sols)]
+    global pool_div = [pool_div; repeat([n_spp_i], n_sols)] 
+    global pool_id = [pool_id; repeat([pool_id_i], n_sols)] 
     #store solutions in the global matrix   
     global all_eq_mat = hcat(all_eq_mat, sol_mat')
 end #for (i)
 #delete first column (of zeros) of matrix 
 all_eq_mat = all_eq_mat[:,2:end]
 #prepend columns iteration counter and community diversity
-all_eq_mat = hcat(sol_id, n_spp_vec, pool_id_vec, all_eq_mat')
+all_eq_mat = hcat(pool_div, pool_id, par_set_id, all_eq_mat')
 #save them by rows
 writedlm("../data/roots_"*output_name*".csv", all_eq_mat)

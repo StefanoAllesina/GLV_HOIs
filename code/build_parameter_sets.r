@@ -79,16 +79,16 @@ sample_parameter_set = function(n, constraints = 'random',
   #kept as separate function to implement constraints modularly
   
   #sample sgrowth rates
-  r = runif(n)
+  r = rnorm(n, 0, 0.1)
   #sample A and B from uniform distribution
   if (constraints == 'random'){
     #interaction matrix
     A = matrix(rnorm(n^2, 0, 0.1), n, n)
     #tensor of HOIs
     B = list()
-    B[[1]] = matrix(runif(n^2), n, n)
-    B[[2]] = matrix(runif(n^2), n, n)
-    B[[3]] = matrix(runif(n^2), n, n)
+    B[[1]] = matrix(rnorm(n^2, 0, 0.1), n, n)
+    B[[2]] = matrix(rnorm(n^2, 0, 0.1), n, n)
+    B[[3]] = matrix(rnorm(n^2, 0, 0.1), n, n)
     B_mat = matrix(unlist(B), nrow = n^2, ncol = n)
   }
   #sample symmetric A and B symmetric from uniform distribution
@@ -116,8 +116,8 @@ sample_parameter_set = function(n, constraints = 'random',
       # divide each element
       Bi <- Bi / xxt
       B[[i]] <- Bi
+    }
   }
-
   #same case implemented by pablo
   else if (constraints == 'prerserving_pla'){
     #sample r
@@ -144,6 +144,8 @@ sample_stack_par = function(diversities, sampling_constr){
     #get largest community and number of communities 
     n_max = max(diversities)
     n_com = length(diversities)
+    #build a species pool vector, common to each community
+    pool_vec = seq(n_com)
     #place holder for all parameter sets
     r_stacked = matrix(0, nrow = sum(n_com), ncol = n_max)
     A_stacked = matrix(0, nrow = sum(diversities), ncol = n_max)
@@ -160,7 +162,7 @@ sample_stack_par = function(diversities, sampling_constr){
 	    ind_B = get_indices(i, diversities^2)
 	    B_stacked[ind_B[1]:(ind_B[2]), 1:n] = par_set[[3]]
 	  }
-    return(list(r_stacked, A_stacked, B_stacked))
+    return(list(r_stacked, A_stacked, B_stacked, diversities, pool_vec))
 }
 
 subcomm_expand = function(all_parameters, diversities){
@@ -214,6 +216,7 @@ subcomm_expand = function(all_parameters, diversities){
 }
 
 save_parameter_set = function(parameter_set, output_name){
+    #get how many parameter lists
     n_pars = length(parameter_set)
     for (i in seq(n_pars)){
 	write.table(parameter_set[[i]], 
