@@ -4,7 +4,6 @@
 using Random
 using HomotopyContinuation
 using LinearAlgebra
-using ProgressBars
 using DelimitedFiles #to load and save files
 
 function random_B(n)
@@ -58,10 +57,10 @@ function main()
     Get number of positive roots for n_sim simulations
     of n species, with n running from 3 to n_max
     """
-    div_max = 4
+    div_max = 10
     div_vec = 3:div_max
     n_div = length(div_vec)
-    n_sim = 2
+    n_sim = 1000
     #preallocate storing matrix, initialize iterator
     n_eq_mat = zeros(n_div*n_sim, 3)
     it = 1
@@ -70,7 +69,7 @@ function main()
         #solve n_sim realizations of communities with i spp
         print("Diversity: ")
         println(i)
-        for j in ProgressBar(1:n_sim)
+        for j in 1:n_sim
             B = random_B(i)
             system = build_system(B, i)
             n_zeros = count_feasible_roots(system)
