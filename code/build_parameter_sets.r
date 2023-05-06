@@ -225,3 +225,17 @@ save_parameter_set = function(parameter_set, output_name){
 		    col.names = F, row.names = F)
     }
 }
+
+load_parameter_set = function(path, number_parameters, par_suffix){
+  pars = list()
+  for (i in seq(number_parameters)){
+    pars[[i]] = as.matrix(read.table(paste("../data/pars_", 
+                               as.character(i),
+                               '_',
+                               par_suffix, 
+                               ".csv",
+                               sep = "" ),
+                         header = F, sep = ' '))
+  }
+  return(pars)
+}

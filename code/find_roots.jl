@@ -27,6 +27,10 @@ function poly_i(x, r, A, B, i)
     r[i] + dot(A[i,:], x) + dot(x, B[:, :, i]*x)
 end
 
+function glv_hoi_d()
+    dot(x, B*x)
+end
+
 function solve_system(equations, presence)
     #instantiate polynomial system 
     F = System(equations)
@@ -35,10 +39,9 @@ function solve_system(equations, presence)
     sol_mat = Array{Float64}(undef, 0)
     try
         #try to solve polynomial system
-        result = solve(F) #might throw error
-        #get number of real solutions
-        real_sols = real_solutions(result)
+        real_sols = real_solutions(solve(F)) #might throw error
         n_sols = size(real_sols, 1)
+        println(real_sols)
         #preallocate n_sols rows of zeros to store solutions
         sol_mat = zeros(n_sols, n_max)
         #loop through solutions
@@ -58,9 +61,10 @@ function solve_system(equations, presence)
 end
 
 #parse of output parameter file name suffix spedifying parameter constraints
-output_name = ARGS[1]
+par_type = ARGS[1]
+run_name = ARGS[2]
 #read data
-rs, As, Bs, diversities, pools = read_data(output_name)
+rs, As, Bs, diversities, pools = read_data(par_type*run_name)
 #total number of communities and biggest community
 n_comms = size(diversities,1)
 n_max = Int16(maximum(diversities))
@@ -111,4 +115,4 @@ all_eq_mat = all_eq_mat[:,2:end]
 #prepend columns iteration counter and community diversity
 all_eq_mat = hcat(pool_div, pool_id, par_set_id, all_eq_mat')
 #save them by rows
-writedlm("../data/roots_"*output_name*".csv", all_eq_mat)
+writedlm("../data/roots_"*par_type*run_name*".csv", all_eq_mat)

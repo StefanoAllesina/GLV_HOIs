@@ -11,26 +11,31 @@ path_to_julia = "/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia"
 source("build_parameter_sets.r")
 
 #specify simulation number and diversity levels
-simulations = 1000
-diversities = c(3, 4, 5, 6, 7, 8, 9, 10)
+simulations = 1
+diversities = c(3)
 div_sim = rep(diversities, each = simulations)
 par_type = 'random'
+run_name = '_small_test'
+output_name = paste(par_type, run_name, sep = "")
+
 
 #sample and stack parameters sets of different communities
-pars = sample_stack_par(div_sim, par_type)#A and B are symmetric
+#pars = sample_stack_par(div_sim, par_type)
+#load parameters
+n_pars = 5
+pars = load_parameter_set("../data/", n_pars, output_name)
 #get subcommunities of each community
-#pars_subcomm = subcomm_expand(pars, div_sim)
+pars_subcomm = subcomm_expand(pars, div_sim)
 #save parameter sets
-save_parameter_set(pars, par_type)
+save_parameter_set(pars_subcomm, output_name)
 #find all roots of the induced system of polynomials through homotopy continuation
-system(paste(path_to_julia, "find_roots.jl", par_type))
+system(paste(path_to_julia, "find_roots.jl", par_type, run_name))
 #create column names and save file
 spp_names = seq(max(diversities))
 col_names = c('pool_div', 'pool_id', 'par_set_id',  spp_names)
-all_roots = read.csv(paste("../data/roots_", par_type, ".csv", sep = ""), 
+all_roots = read.csv(paste("../data/roots_", output_name, ".csv", sep = ""), 
                      sep = '\t', header = F,
 	       	     col.names = col_names, check.names = F)
 #save clean data
-write.csv(all_roots, paste("../data/roots_", par_type, ".csv", sep = ""), 
+write.csv(all_roots, paste("../data/roots_", output_name, ".csv", sep = ""), 
 	  row.names = F)
-

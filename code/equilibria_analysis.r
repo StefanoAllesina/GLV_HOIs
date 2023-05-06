@@ -4,6 +4,10 @@ library("tidyverse")
 source("jacobian.R")
 source("build_parameter_sets.r")
 
+expected_eq = function(n, d = 3){
+  return (1/(2^(n-1))*(d-1)^((n-1)/2))
+}
+
 #set type of simulations to analyze
 par_type = 'random'
 #load data
@@ -31,8 +35,32 @@ df = data %>% add_count(par_set_id, name = 'n_eq') %>% #counts number of sols
                values_to = 'abundance') %>% 
   group_by(par_set_id, eq_id) %>% 
   mutate(comm_div = sum(abundance != 0), #gets sub-community abundance
-         feasible = all(abundance >= 0)) #gets feasibility of equilibrium
-  
+         feasible = all(abundance >= 0)) %>%  #gets feasibility of equilibrium
+  group_by(pool_div, pool_id, par_set_id, spp_id)
+
+#when subcommunitiess are not included
+
+#add useful metrics
+df = data %>% add_count(par_set_id, name = 'n_eq') %>% #counts number of sols
+  group_by(pool_id, pool_div) %>% 
+  mutate(eq_id = seq(n_eq)) %>% #adds index to identify each solution
+  select(-c(n_eq, par_set_id)) %>% #delete unneded rows
+  pivot_longer(cols = 3:(n_cols-1), names_to = 'spp_id', 
+               values_to = 'abundance') %>% 
+  filter(abundance != 0) %>% 
+  group_by(pool_id, eq_id) %>% 
+  mutate(feasible = all(abundance >= 0)) %>%  #gets feasibility of equilibrium
+  filter(feasible == T) %>% 
+  group_by(pool_div, pool_id) %>% 
+  filter(spp_id == "X1") %>% 
+  group_by(pool_div) %>% 
+  count(feasible, name = 'number_eq')
+
+  ggplot(df, aes(x = pool_div, y = number_eq/1000)) + 
+    geom_point() +
+    geom_function(fun = expected_eq, args = list(d = 2))+
+    geom_function(fun = expected_eq, args = list(d = 3))
+    
 #calculate stability of each equilibria
 stability = function(eq, A, B){
   #calculate the jacobian
