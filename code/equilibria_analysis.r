@@ -12,9 +12,12 @@ expected_eq = function(n, d = 3){
 par_type = 'random'
 #load data
 data = read.csv(paste("../data/roots_", par_type, ".csv", sep = "" ))
-rs = read.csv(paste("../data/pars_1_", par_type, ".csv", sep = ""), header = F, sep = ' ')
-As = read.csv(paste("../data/pars_2_", par_type, ".csv", sep = ""), header = F, sep = ' ')
-Bs = read.csv(paste("../data/pars_3_", par_type, ".csv", sep = ""), header = F, sep = ' ')
+rs = read.csv(paste("../data/pars_1_", par_type, ".csv", sep = ""), 
+              header = F, sep = ' ')
+As = read.csv(paste("../data/pars_2_", par_type, ".csv", sep = ""), 
+              header = F, sep = ' ')
+Bs = read.csv(paste("../data/pars_3_", par_type, ".csv", sep = ""), 
+              header = F, sep = ' ')
 diversities = read.csv(paste("../data/pars_4_", par_type, ".csv", sep = ""), 
                        header = F, sep = ' ')
 #get only indices of parameter sets that yielded at least one equilibrium
